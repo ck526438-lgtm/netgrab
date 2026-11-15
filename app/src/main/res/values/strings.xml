@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">NetGrab</string>
+    <string name="tagline">Colle un lien. Récupère la vidéo en haute qualité.</string>
+    <string name="hint_url">https://… (YouTube, TikTok, Instagram, Facebook, X…)</string>
+    <string name="paste">Coller</string>
+    <string name="quality">Qualité</string>
+    <string name="download">Télécharger</string>
+    <string name="cancel">Annuler</string>
+    <string name="update_engine">Mettre à jour le moteur</string>
+    <string name="networks">Réseaux pris en charge : YouTube, TikTok, Instagram, Facebook, X (Twitter), Snapchat, Pinterest, Vimeo, Dailymotion, Reddit, Twitch et plus de 1000 autres sites.</string>
+    <string name="legal">Ne télécharge que des contenus dont tu as les droits ou l\'autorisation.</string>
+    <string name="logo_desc">Logo NetGrab</string>
+
+    <string name="st_preparing">Préparation du moteur…</string>
+    <string name="st_updating">Mise à jour du moteur…</string>
+    <string name="st_ready">Prêt.</string>
+    <string name="st_engine_error">Erreur du moteur : %1$s</string>
+    <string name="st_no_url">Colle d\'abord un lien valide.</string>
+    <string name="st_not_ready">Le moteur n\'est pas encore prêt, patiente un instant.</string>
+    <string name="st_starting">Analyse du lien…</string>
+    <string name="st_progress">%1$d %% — reste %2$s</string>
+    <string name="st_finishing">Finalisation (fusion vidéo + audio)…</string>
+    <string name="st_done">Terminé : %1$s</string>
+    <string name="st_cancelled">Téléchargement annulé.</string>
+    <string name="st_failed">Échec : %1$s</string>
+    <string name="st_updated">Moteur à jour.</string>
+    <string name="st_update_failed">Mise à jour impossible : %1$s</string>
+    <string name="st_permission">Autorise le stockage puis relance le téléchargement.</string>
+
+    <string-array name="qualities">
+        <item>Meilleure qualité (4K/2K si dispo)</item>
+        <item>1080p (Full HD)</item>
+        <item>720p (HD)</item>
+        <item>480p (léger)</item>
+        <item>Audio seul (MP3)</item>
+    </string-array>
+</resources>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.NetGrab" parent="Theme.MaterialComponents.NoActionBar">
+        <item name="colorPrimary">@color/matrix_green</item>
+        <item name="colorPrimaryVariant">@color/matrix_green_dim</item>
+        <item name="colorOnPrimary">@color/black</item>
+        <item name="colorSecondary">@color/matrix_green</item>
+        <item name="colorOnSecondary">@color/black</item>
+        <item name="colorError">@color/alert_red</item>
+        <item name="android:windowBackground">@color/black</item>
+        <item name="android:statusBarColor">@color/black</item>
+        <item name="android:navigationBarColor">@color/black</item>
+        <item name="android:textColorPrimary">@color/text_main</item>
+        <item name="android:textColorSecondary">@color/text_dim</item>
+    </style>
+</resources>

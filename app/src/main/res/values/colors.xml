@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#000000</color>
+    <color name="surface">#0B120B</color>
+    <color name="matrix_green">#00E639</color>
+    <color name="matrix_green_dim">#0A7A25</color>
+    <color name="alert_red">#FF2A2A</color>
+    <color name="text_main">#D6FFD9</color>
+    <color name="text_dim">#6FA878</color>
+</resources>
