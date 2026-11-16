@@ -30,3 +30,8 @@ Android Studio (JDK 17) : ouvrir le dossier puis *Run*, ou `gradle assembleDebug
 - Le téléchargement s'arrête si l'appli est fermée (pas encore de service en arrière-plan).
 - Vidéos privées / avec connexion obligatoire non prises en charge.
 - N'utilise l'appli que pour des contenus dont tu as les droits ou l'autorisation.
+
+## Version web
+
+Le dossier [`web/`](web/) contient NetGrab Web : la même chose dans le navigateur (PC, iPhone, Android),
+avec son serveur à lancer en local ou à héberger. Voir [`web/README.md`](web/README.md).

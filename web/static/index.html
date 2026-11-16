@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NetGrab — Télécharger des vidéos et des MP3 par lien</title>
+<meta name="description" content="Colle un lien, récupère la vidéo en haute qualité ou le son en MP3.">
+<meta name="theme-color" content="#000000">
+<link rel="icon" href="/static/icon-192.png">
+<style>
+  :root {
+    --bg: #020403; --panel: #0a120c; --panel-2: #0f1b12; --line: #17361f;
+    --green: #00e639; --green-dim: #0a7a25; --text: #d6ffd9; --dim: #7fb089; --red: #ff3b3b;
+    --mono: ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  body { background: var(--bg); color: var(--text); font-family: var(--mono); line-height: 1.5; }
+  canvas#rain { position: fixed; inset: 0; width: 100%; height: 100%; opacity: .16; pointer-events: none; }
+  main { position: relative; max-width: 720px; margin: 0 auto; padding: 28px 18px 48px; }
+  header { display: flex; align-items: center; gap: 16px; margin-bottom: 22px; }
+  header img { width: 76px; height: 76px; border-radius: 16px; border: 1px solid var(--line); }
+  h1 { margin: 0; font-size: 30px; letter-spacing: .18em; color: var(--green); text-shadow: 0 0 18px rgba(0,230,57,.35); }
+  header p { margin: 2px 0 0; color: var(--dim); font-size: 13px; }
+  .panel { background: linear-gradient(180deg, var(--panel-2), var(--panel)); border: 1px solid var(--line); border-radius: 16px; padding: 18px; margin-bottom: 16px; }
+  label { display: block; font-size: 12px; color: var(--dim); margin-bottom: 6px; text-transform: uppercase; letter-spacing: .08em; }
+  .row { display: flex; gap: 8px; }
+  input[type=url], input[type=password] { flex: 1; min-width: 0; height: 52px; padding: 0 14px; background: #000; color: var(--text); border: 1px solid var(--line); border-radius: 12px; font: 15px var(--mono); }
+  input:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+  button, a.btn { height: 52px; padding: 0 18px; border-radius: 12px; border: 1px solid var(--green-dim); background: transparent; color: var(--green); font: 600 15px var(--mono); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
+  button:hover:not(:disabled), a.btn:hover { background: rgba(0,230,57,.08); }
+  button.primary, a.btn.primary { background: var(--green); color: #000; border-color: var(--green); }
+  button.primary:hover:not(:disabled), a.btn.primary:hover { background: #3dff6b; }
+  button.danger { color: var(--red); border-color: #6b1d1d; }
+  button:disabled { opacity: .45; cursor: not-allowed; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 14px; }
+  .chips button { height: 44px; padding: 0 14px; font-size: 14px; font-weight: 500; color: var(--text); border-color: var(--line); }
+  .chips button[aria-pressed=true] { color: #000; background: var(--green); border-color: var(--green); font-weight: 700; }
+  .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .preview { display: flex; gap: 14px; align-items: center; }
+  .preview img { width: 132px; height: 76px; object-fit: cover; border-radius: 10px; background: #000; border: 1px solid var(--line); flex: none; }
+  .preview h2 { margin: 0; font-size: 15px; color: var(--text); overflow-wrap: anywhere; }
+  .preview p { margin: 4px 0 0; font-size: 12px; color: var(--dim); }
+  .bar { height: 12px; background: #000; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; margin: 12px 0 8px; }
+  .bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--green-dim), var(--green)); transition: width .4s ease; }
+  .bar.wait i { width: 35%; animation: slide 1.2s ease-in-out infinite alternate; }
+  @keyframes slide { from { margin-left: 0; } to { margin-left: 65%; } }
+  #status { font-size: 14px; min-height: 21px; overflow-wrap: anywhere; }
+  #status.err { color: var(--red); }
+  .hidden { display: none !important; }
+  .small { font-size: 12px; color: var(--dim); }
+  .legal { color: #ff8f8f; }
+  footer { margin-top: 22px; }
+  @media (max-width: 520px) {
+    h1 { font-size: 24px; } .actions { grid-template-columns: 1fr; }
+    .preview { flex-direction: column; align-items: flex-start; } .preview img { width: 100%; height: auto; aspect-ratio: 16/9; }
+  }
+  @media (prefers-reduced-motion: reduce) { canvas#rain { display: none; } .bar i, .bar.wait i { transition: none; animation: none; } }
+</style>
+</head>
+<body>
+<canvas id="rain" aria-hidden="true"></canvas>
+<main>
+  <header>
+    <img src="/static/logo.png" alt="Logo NetGrab" width="76" height="76">
+    <div>
+      <h1>NETGRAB</h1>
+      <p>Colle un lien. Récupère la vidéo en haute qualité ou le son en MP3.</p>
+    </div>
+  </header>
+
+  <section class="panel hidden" id="loginPanel">
+    <form id="loginForm">
+      <label for="pass">Mot de passe d'accès</label>
+      <div class="row">
+        <input type="password" id="pass" autocomplete="current-password" required>
+        <button class="primary" type="submit">Entrer</button>
+      </div>
+      <p class="small" id="loginMsg" role="alert"></p>
+    </form>
+  </section>
+
+  <div id="appPanel" class="hidden">
+    <section class="panel">
+      <form id="urlForm">
+        <label for="url">Lien de la vidéo</label>
+        <div class="row">
+          <input type="url" id="url" inputmode="url" placeholder="https://…" autocomplete="off" required>
+          <button type="button" id="pasteBtn">Coller</button>
+        </div>
+
+        <div id="preview" class="preview hidden" style="margin-top:14px">
+          <img id="thumb" alt="" referrerpolicy="no-referrer">
+          <div><h2 id="title"></h2><p id="meta"></p></div>
+        </div>
+
+        <label style="margin-top:16px" id="qLabel">Qualité de la vidéo</label>
+        <div class="chips" role="group" aria-labelledby="qLabel">
+          <button type="button" data-q="best" aria-pressed="true">Meilleure (4K/2K)</button>
+          <button type="button" data-q="1080" aria-pressed="false">1080p</button>
+          <button type="button" data-q="720" aria-pressed="false">720p</button>
+          <button type="button" data-q="480" aria-pressed="false">480p</button>
+        </div>
+
+        <div class="actions">
+          <button class="primary" type="submit" id="videoBtn">Télécharger la vidéo</button>
+          <button type="button" id="mp3Btn">♪ Télécharger en MP3</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="panel hidden" id="jobPanel" aria-live="polite">
+      <div class="bar" id="bar"><i id="fill"></i></div>
+      <div id="status"></div>
+      <div class="actions" style="margin-top:12px">
+        <a class="btn primary hidden" id="saveBtn" download>Enregistrer le fichier</a>
+        <button type="button" class="danger hidden" id="cancelBtn">Annuler</button>
+      </div>
+    </section>
+
+    <footer>
+      <p class="small">Réseaux pris en charge : YouTube, TikTok, Instagram, Facebook, X (Twitter), Snapchat, Pinterest, Vimeo, Dailymotion, Reddit, Twitch et plus de 1000 autres sites.</p>
+      <p class="small" id="ttlNote"></p>
+      <p class="small legal">Ne télécharge que des contenus dont tu as les droits ou l'autorisation.</p>
+    </footer>
+  </div>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+let quality = 'best', jobId = null, timer = null, busy = false;
+
+async function api(path, opts = {}) {
+  const res = await fetch(path, { credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, ...opts });
+  let data = {};
+  try { data = await res.json(); } catch (e) {}
+  if (res.status === 401 && path !== '/api/login') { showLogin(); }
+  if (!res.ok) throw new Error(data.error || ('Erreur du serveur (' + res.status + ').'));
+  return data;
+}
+
+function showLogin() { $('loginPanel').classList.remove('hidden'); $('appPanel').classList.add('hidden'); }
+function showApp() { $('loginPanel').classList.add('hidden'); $('appPanel').classList.remove('hidden'); }
+
+function setStatus(text, isError) { const s = $('status'); s.textContent = text; s.classList.toggle('err', !!isError); }
+function setBusy(v) {
+  busy = v;
+  for (const id of ['videoBtn', 'mp3Btn', 'pasteBtn', 'url']) $(id).disabled = v;
+  document.querySelectorAll('.chips button').forEach((b) => b.disabled = v);
+  $('cancelBtn').classList.toggle('hidden', !v);
+}
+function fmtTime(s) { if (s == null) return ''; s = Math.round(s); const m = Math.floor(s / 60); return m + ':' + String(s % 60).padStart(2, '0'); }
+function fmtSize(b) { if (!b) return ''; return b > 1e9 ? (b / 1e9).toFixed(2) + ' Go' : (b / 1e6).toFixed(1) + ' Mo'; }
+function cleanUrl() { const m = $('url').value.match(/https?:\/\/\S+/); return m ? m[0] : ''; }
+
+async function analyse() {
+  const url = cleanUrl(); if (!url) return;
+  $('preview').classList.add('hidden');
+  try {
+    const d = await api('/api/info', { method: 'POST', body: JSON.stringify({ url }) });
+    if (cleanUrl() !== url) return;
+    $('title').textContent = d.title;
+    const bits = [d.site, d.uploader, d.duration ? fmtTime(d.duration) : '', d.max_height ? 'jusqu\'à ' + d.max_height + 'p' : ''];
+    $('meta').textContent = bits.filter(Boolean).join(' · ');
+    if (d.thumbnail) { $('thumb').src = d.thumbnail; $('thumb').classList.remove('hidden'); } else { $('thumb').classList.add('hidden'); }
+    $('preview').classList.remove('hidden');
+  } catch (e) { /* l'aperçu est facultatif : l'erreur réelle s'affichera au téléchargement */ }
+}
+
+async function start(q) {
+  const url = cleanUrl();
+  $('jobPanel').classList.remove('hidden'); $('saveBtn').classList.add('hidden');
+  if (!url) { setStatus('Colle d\'abord un lien valide.', true); return; }
+  setBusy(true); $('bar').classList.add('wait'); $('fill').style.width = '';
+  setStatus('Analyse du lien…');
+  try {
+    const job = await api('/api/jobs', { method: 'POST', body: JSON.stringify({ url, quality: q }) });
+    jobId = job.id; poll();
+  } catch (e) { fail(e.message); }
+}
+
+function fail(msg) { clearTimeout(timer); setBusy(false); $('bar').classList.remove('wait'); $('fill').style.width = '0'; setStatus('Échec : ' + msg, true); }
+
+async function poll() {
+  clearTimeout(timer);
+  let j;
+  try { j = await api('/api/jobs/' + jobId); } catch (e) { return fail(e.message); }
+  if (j.status === 'queued') setStatus('En file d\'attente…');
+  else if (j.status === 'running') {
+    if (j.progress > 0) {
+      $('bar').classList.remove('wait'); $('fill').style.width = j.progress + '%';
+      const extra = [j.eta != null ? 'reste ' + fmtTime(j.eta) : '', j.speed ? fmtSize(j.speed) + '/s' : ''].filter(Boolean).join(' · ');
+      setStatus(Math.round(j.progress) + ' %' + (extra ? ' — ' + extra : ''));
+    } else setStatus('Analyse du lien…');
+  } else if (j.status === 'finishing') {
+    $('bar').classList.remove('wait'); $('fill').style.width = '99%';
+    setStatus(j.quality === 'mp3' ? 'Conversion en MP3…' : 'Finalisation (fusion vidéo + audio)…');
+  } else if (j.status === 'done') {
+    setBusy(false); $('bar').classList.remove('wait'); $('fill').style.width = '100%';
+    setStatus('Terminé : ' + j.filename + (j.size ? ' (' + fmtSize(j.size) + ')' : ''));
+    const a = $('saveBtn'); a.href = '/api/jobs/' + j.id + '/file'; a.classList.remove('hidden'); a.click();
+    return;
+  } else if (j.status === 'cancelled') { setBusy(false); $('bar').classList.remove('wait'); $('fill').style.width = '0'; setStatus('Téléchargement annulé.'); return; }
+  else if (j.status === 'error') return fail(j.error || 'erreur inconnue');
+  timer = setTimeout(poll, 1000);
+}
+
+$('urlForm').addEventListener('submit', (e) => { e.preventDefault(); if (!busy) start(quality); });
+$('mp3Btn').addEventListener('click', () => { if (!busy) start('mp3'); });
+$('cancelBtn').addEventListener('click', async () => { if (jobId) { try { await api('/api/jobs/' + jobId, { method: 'DELETE' }); } catch (e) {} } });
+$('pasteBtn').addEventListener('click', async () => {
+  try { const t = await navigator.clipboard.readText(); const m = t.match(/https?:\/\/\S+/); $('url').value = m ? m[0] : t; analyse(); }
+  catch (e) { $('url').focus(); }
+});
+let debounce; $('url').addEventListener('input', () => { clearTimeout(debounce); debounce = setTimeout(analyse, 700); });
+document.querySelectorAll('.chips button').forEach((b) => b.addEventListener('click', () => {
+  quality = b.dataset.q; document.querySelectorAll('.chips button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+}));
+$('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault(); $('loginMsg').textContent = '';
+  try { await api('/api/login', { method: 'POST', body: JSON.stringify({ password: $('pass').value }) }); showApp(); }
+  catch (err) { $('loginMsg').textContent = err.message; }
+});
+
+(async () => {
+  try {
+    const c = await api('/api/config');
+    $('ttlNote').textContent = 'Les fichiers sont effacés du serveur après ' + c.ttl_min + ' minutes.' +
+      (c.max_duration_min ? ' Durée maximale d\'une vidéo : ' + c.max_duration_min + ' minutes.' : '');
+    if (c.auth_required && !c.authenticated) showLogin(); else showApp();
+  } catch (e) { showApp(); }
+  const shared = new URLSearchParams(location.search).get('url');
+  if (shared) { $('url').value = shared; analyse(); }
+})();
+
+// Pluie binaire discrète en fond, reprise du logo.
+(() => {
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const c = $('rain'), x = c.getContext('2d'); let cols = [], w = 0, h = 0; const size = 16;
+  function fit() { w = c.width = innerWidth; h = c.height = innerHeight; cols = Array.from({ length: Math.ceil(w / size) }, () => Math.random() * h / size); }
+  fit(); addEventListener('resize', fit);
+  setInterval(() => {
+    x.fillStyle = 'rgba(2,4,3,.12)'; x.fillRect(0, 0, w, h);
+    x.fillStyle = '#00e639'; x.font = size + 'px monospace';
+    cols.forEach((y, i) => { x.fillText(Math.random() > .5 ? '1' : '0', i * size, y * size); cols[i] = y * size > h && Math.random() > .975 ? 0 : y + 1; });
+  }, 70);
+})();
+</script>
+</body>
+</html>
