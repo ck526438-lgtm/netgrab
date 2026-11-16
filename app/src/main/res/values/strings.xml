@@ -5,7 +5,8 @@
     <string name="hint_url">https://… (YouTube, TikTok, Instagram, Facebook, X…)</string>
     <string name="paste">Coller</string>
     <string name="quality">Qualité</string>
-    <string name="download">Télécharger</string>
+    <string name="download">Télécharger la vidéo</string>
+    <string name="download_mp3">♪ Télécharger en MP3 (audio seul)</string>
     <string name="cancel">Annuler</string>
     <string name="update_engine">Mettre à jour le moteur</string>
     <string name="networks">Réseaux pris en charge : YouTube, TikTok, Instagram, Facebook, X (Twitter), Snapchat, Pinterest, Vimeo, Dailymotion, Reddit, Twitch et plus de 1000 autres sites.</string>

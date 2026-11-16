@@ -8,7 +8,8 @@ Moteur : [yt-dlp](https://github.com/yt-dlp/yt-dlp) + FFmpeg via
 ## Fonctions
 
 - Coller un lien, ou **Partager > NetGrab** depuis n'importe quelle appli
-- Qualité : meilleure dispo (4K/2K), 1080p, 720p, 480p, ou audio MP3
+- Qualité : meilleure dispo (4K/2K), 1080p, 720p, 480p
+- Bouton dédié « Télécharger en MP3 » (audio seul, enregistré dans `Musique/NetGrab`)
 - Fusion vidéo + audio en MP4, enregistrement dans `Films/NetGrab` (visible dans la galerie)
   et `Musique/NetGrab` pour l'audio
 - Mise à jour automatique du moteur yt-dlp (1 fois par jour) + bouton manuel

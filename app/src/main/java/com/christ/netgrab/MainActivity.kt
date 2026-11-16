@@ -38,6 +38,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var pasteBtn: Button
     private lateinit var qualitySpinner: Spinner
     private lateinit var downloadBtn: Button
+    private lateinit var mp3Btn: Button
     private lateinit var updateBtn: Button
     private lateinit var progressBar: ProgressBar
     private lateinit var statusText: TextView
@@ -54,12 +55,14 @@ class MainActivity : AppCompatActivity() {
         pasteBtn = findViewById(R.id.pasteBtn)
         qualitySpinner = findViewById(R.id.qualitySpinner)
         downloadBtn = findViewById(R.id.downloadBtn)
+        mp3Btn = findViewById(R.id.mp3Btn)
         updateBtn = findViewById(R.id.updateBtn)
         progressBar = findViewById(R.id.progressBar)
         statusText = findViewById(R.id.statusText)
 
         pasteBtn.setOnClickListener { pasteFromClipboard() }
-        downloadBtn.setOnClickListener { if (busy) cancelDownload() else startDownload() }
+        downloadBtn.setOnClickListener { if (busy) cancelDownload() else startDownload(audio = false) }
+        mp3Btn.setOnClickListener { if (!busy) startDownload(audio = true) }
         updateBtn.setOnClickListener { updateEngine(manual = true) }
 
         handleShare(intent)
@@ -147,7 +150,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun startDownload() {
+    /** audio = true : extrait uniquement le son et l'enregistre en MP3. */
+    private fun startDownload(audio: Boolean) {
         val url = extractUrl(urlInput.text.toString())
         if (url == null) {
             statusText.setText(R.string.st_no_url)
@@ -168,7 +172,7 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        val quality = qualitySpinner.selectedItemPosition
+        val quality = if (audio) 4 else qualitySpinner.selectedItemPosition
         cancelled = false
         setBusy(true)
         statusText.setText(R.string.st_starting)
@@ -312,6 +316,7 @@ class MainActivity : AppCompatActivity() {
         busy = value
         downloadBtn.setText(if (value) R.string.cancel else R.string.download)
         pasteBtn.isEnabled = !value
+        mp3Btn.isEnabled = !value
         updateBtn.isEnabled = !value
         qualitySpinner.isEnabled = !value
         urlInput.isEnabled = !value
