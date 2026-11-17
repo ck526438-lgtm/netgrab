@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NetGrab — Télécharge vidéos et MP3 par lien</title>
+<meta name="description" content="Appli Android gratuite : colle un lien, récupère la vidéo en haute qualité ou le son en MP3.">
+<meta name="theme-color" content="#000000">
+<meta property="og:title" content="NetGrab — Télécharge vidéos et MP3 par lien">
+<meta property="og:description" content="Colle un lien, récupère la vidéo en haute qualité ou le son en MP3.">
+<meta property="og:image" content="logo.png">
+<link rel="icon" href="icon-192.png">
+<style>
+  :root {
+    --bg: #020403; --panel: #0a120c; --panel-2: #0f1b12; --line: #17361f;
+    --green: #00e639; --green-dim: #0a7a25; --text: #d6ffd9; --dim: #86b590; --red: #ff6b6b;
+    --mono: ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--mono); line-height: 1.6; }
+  canvas#rain { position: fixed; inset: 0; width: 100%; height: 100%; opacity: .14; pointer-events: none; }
+  main { position: relative; max-width: 880px; margin: 0 auto; padding: 40px 20px 56px; }
+  .hero { display: grid; grid-template-columns: 220px 1fr; gap: 32px; align-items: center; margin-bottom: 44px; }
+  .hero img { width: 220px; height: 220px; border-radius: 28px; border: 1px solid var(--line); box-shadow: 0 0 60px rgba(0,230,57,.15); }
+  h1 { margin: 0; font-size: 46px; letter-spacing: .16em; color: var(--green); text-shadow: 0 0 24px rgba(0,230,57,.35); }
+  .tag { margin: 6px 0 22px; font-size: 18px; color: var(--text); }
+  .cta { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  a.btn { display: inline-flex; align-items: center; justify-content: center; min-height: 56px; padding: 0 24px; border-radius: 14px; text-decoration: none; font-weight: 700; font-size: 16px; border: 1px solid var(--green-dim); color: var(--green); }
+  a.btn.primary { background: var(--green); color: #000; border-color: var(--green); }
+  a.btn.primary:hover { background: #3dff6b; }
+  a.btn:not(.primary):hover { background: rgba(0,230,57,.08); }
+  a:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; }
+  .note { font-size: 13px; color: var(--dim); margin-top: 10px; }
+  h2 { font-size: 15px; letter-spacing: .14em; text-transform: uppercase; color: var(--green); margin: 0 0 16px; }
+  section { margin-bottom: 40px; }
+  .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .card { background: linear-gradient(180deg, var(--panel-2), var(--panel)); border: 1px solid var(--line); border-radius: 16px; padding: 18px; }
+  .card b { display: block; color: var(--text); font-size: 16px; margin-bottom: 4px; }
+  .card span { color: var(--dim); font-size: 14px; }
+  ol { margin: 0; padding-left: 22px; }
+  ol li { margin-bottom: 8px; }
+  ol li::marker { color: var(--green); font-weight: 700; }
+  .sites { color: var(--dim); font-size: 14px; }
+  footer { border-top: 1px solid var(--line); padding-top: 20px; font-size: 13px; color: var(--dim); }
+  footer .legal { color: var(--red); }
+  footer a { color: var(--green); }
+  @media (max-width: 640px) {
+    main { padding-top: 28px; }
+    .hero { grid-template-columns: 1fr; text-align: center; gap: 18px; }
+    .hero img { width: 150px; height: 150px; margin: 0 auto; }
+    h1 { font-size: 34px; } .tag { font-size: 16px; }
+    .cta { justify-content: center; } a.btn { width: 100%; }
+    .grid { grid-template-columns: 1fr; }
+  }
+  @media (prefers-reduced-motion: reduce) { canvas#rain { display: none; } }
+</style>
+</head>
+<body>
+<canvas id="rain" aria-hidden="true"></canvas>
+<main>
+  <header class="hero">
+    <img src="logo.png" alt="Logo NetGrab" width="220" height="220">
+    <div>
+      <h1>NETGRAB</h1>
+      <p class="tag">Colle un lien. Récupère la vidéo en haute qualité ou le son en MP3.</p>
+      <div class="cta">
+        <a class="btn primary" href="https://github.com/ck526438-lgtm/netgrab/releases/latest/download/NetGrab.apk">Télécharger l'APK Android</a>
+        <a class="btn" href="https://github.com/ck526438-lgtm/netgrab">Code source</a>
+      </div>
+      <p class="note">Gratuit · Android 7 ou plus récent · environ 66 Mo</p>
+    </div>
+  </header>
+
+  <section>
+    <h2>Fonctions</h2>
+    <div class="grid">
+      <div class="card"><b>Haute qualité</b><span>Meilleure qualité disponible (jusqu'en 4K), ou 1080p, 720p, 480p.</span></div>
+      <div class="card"><b>MP3 en un bouton</b><span>Récupère uniquement le son, enregistré dans ta musique.</span></div>
+      <div class="card"><b>Partager &gt; NetGrab</b><span>Depuis TikTok, Instagram ou YouTube, partage la vidéo vers NetGrab.</span></div>
+      <div class="card"><b>Toujours à jour</b><span>Le moteur se met à jour tout seul pour suivre les changements des sites.</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Installation</h2>
+    <ol>
+      <li>Touche « Télécharger l'APK Android » depuis ton téléphone.</li>
+      <li>Ouvre le fichier téléchargé et autorise l'installation depuis cette source si Android le demande.</li>
+      <li>Au premier lancement, attends que l'appli affiche « Prêt. ».</li>
+      <li>Colle un lien, choisis la qualité, puis touche Télécharger.</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>Sites pris en charge</h2>
+    <p class="sites">YouTube, TikTok, Instagram, Facebook, X (Twitter), Snapchat, Pinterest, Vimeo, Dailymotion, Reddit, Twitch et plus de 1000 autres sites.</p>
+  </section>
+
+  <footer>
+    <p class="legal">Ne télécharge que des contenus dont tu as les droits ou l'autorisation.</p>
+    <p>NetGrab est un projet open source construit sur yt-dlp et FFmpeg. <a href="https://github.com/ck526438-lgtm/netgrab/releases">Toutes les versions</a></p>
+  </footer>
+</main>
+<script>
+(() => {
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const c = document.getElementById('rain'), x = c.getContext('2d'); let cols = [], w = 0, h = 0; const size = 16;
+  function fit() { w = c.width = innerWidth; h = c.height = innerHeight; cols = Array.from({ length: Math.ceil(w / size) }, () => Math.random() * h / size); }
+  fit(); addEventListener('resize', fit);
+  setInterval(() => {
+    x.fillStyle = 'rgba(2,4,3,.12)'; x.fillRect(0, 0, w, h);
+    x.fillStyle = '#00e639'; x.font = size + 'px monospace';
+    cols.forEach((y, i) => { x.fillText(Math.random() > .5 ? '1' : '0', i * size, y * size); cols[i] = y * size > h && Math.random() > .975 ? 0 : y + 1; });
+  }, 70);
+})();
+</script>
+</body>
+</html>

@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths-ignore:
       - 'web/**'
+      - 'docs/**'
       - 'render.yaml'
       - '**.md'
   workflow_dispatch:
